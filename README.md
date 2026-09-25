@@ -1,4 +1,4 @@
-# 🇳🇬 MoRe (Mortgage and Registry)
+# MoRe (Mortgage and Registry)
 
 **The Operating System for Nigerian Real Estate**
 
@@ -6,7 +6,7 @@ MoRe seamlessly bridges the gap between land security and capital. We combine an
 
 ---
 
-## ⚠️ The Systemic Crisis in Nigerian Real Estate
+## The Systemic Crisis in Nigerian Real Estate
 
 The Nigerian property market possesses trillions of Naira in locked value ("Dead Capital") due to a chain reaction of systemic failures:
 
@@ -15,6 +15,8 @@ The root of the crisis is the cadastral registry. Because surveys are largely pa
 
 ### 2. The Seeking Mortgage Challenge
 Because the underlying land titles are fundamentally insecure, Commercial Banks and Primary Mortgage Banks (PMBs) view real estate as high-risk. Without mathematical certainty that a borrower actually owns the land, banks refuse to underwrite long-term mortgages, crippling the housing market.
+
+Furthermore, everyday homebuyers face a massive visibility problem. Most Nigerians are completely unaware of their mortgage qualification status, affordability metrics, or the specific loan products available to them. MoRe solves this by acting as a transparent financial bridge, empowering citizens to instantly check their affordability, understand their qualification status, and get matched with the right lenders before committing to a property.
 
 ### 3. The Trust Deficit
 The industry is plagued by a lack of trust. Fraudulent surveyors manipulate data, identity verification is weak, and paper trails are easily forged. Lenders have no single source of truth to verify who surveyed the land, who owns it, and if it has been sub-divided.
