@@ -26,7 +26,7 @@ Developers spend billions building premium estates but struggle to liquidate the
 
 ---
 
-## 🛡️ The MoRe Solution
+## The MoRe Solution
 
 MoRe solves the **Cold Start Data Problem** by using the mortgage application process (the Point-of-Sale) as the trojan horse to build a cryptographically secure land registry. 
 
@@ -48,7 +48,7 @@ Because the collateral (the land) is mathematically secured by the Registry Engi
 
 ---
 
-## 🏗️ Architecture (Microservices Monorepo)
+## Architecture (Microservices Monorepo)
 
 To ensure the flexibility of the marketplace without compromising the strict mathematics of the registry, MoRe is built as a microservices monorepo:
 
@@ -62,32 +62,3 @@ The core business logic engine. Handles user authentication (JWT), mortgage prod
 The heavy-lifting spatial oracle. It receives GPS data, calculates H3 spatial overlap hashes, enforces the Dual-Key parent-child lineage logic, and contains the `anchoring.py` web3 script that notarizes the database state to the Polygon blockchain.
 
 ---
-
-## 🚀 Getting Started
-
-To run the entire M&R stack locally, you will need three terminal windows.
-
-**1. Start the Spatial Registry Engine**
-```bash
-cd registry-engine
-python -m venv venv
-source venv/Scripts/activate # (or venv/bin/activate on Mac/Linux)
-pip install -r requirements.txt
-uvicorn main:app --port 8000
-```
-
-**2. Start the Marketplace API**
-```bash
-cd marketplace-backend
-npm install
-npm run dev
-# Runs on http://localhost:5000
-```
-
-**3. Start the Unified Frontend**
-```bash
-cd frontend
-npm install
-npm run dev
-# Runs on http://localhost:5173
-```
