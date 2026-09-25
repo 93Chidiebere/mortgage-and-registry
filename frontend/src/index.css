@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Nigerian Fintech Design System - Unified Mortgage Marketplace */
+
+@layer base {
+  :root {
+    /* Primary - Deep Nigerian Green */
+    --primary: 151 63% 25%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary - Nigerian Gold */
+    --secondary: 43 96% 56%;
+    --secondary-foreground: 151 63% 15%;
+    
+    /* Background & Surfaces */
+    --background: 0 0% 100%;
+    --foreground: 151 20% 10%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 151 20% 10%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 151 20% 10%;
+    
+    /* Muted & Accents */
+    --muted: 150 10% 96%;
+    --muted-foreground: 151 10% 45%;
+    
+    --accent: 43 96% 56%;
+    --accent-foreground: 151 63% 15%;
+    
+    /* Functional Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 151 63% 35%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 43 96% 56%;
+    --warning-foreground: 151 63% 15%;
+    
+    --info: 210 100% 50%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Borders & Inputs */
+    --border: 150 15% 90%;
+    --input: 150 15% 90%;
+    --ring: 151 63% 25%;
+    
+    --radius: 0.75rem;
+    
+    /* Sidebar */
+    --sidebar-background: 151 30% 97%;
+    --sidebar-foreground: 151 20% 20%;
+    --sidebar-primary: 151 63% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 43 96% 56%;
+    --sidebar-accent-foreground: 151 63% 15%;
+    --sidebar-border: 150 15% 90%;
+    --sidebar-ring: 151 63% 25%;
+    
+    /* Custom Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(151 63% 25%) 0%, hsl(151 63% 35%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 96% 66%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(151 30% 97%) 0%, hsl(0 0% 100%) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(151 20% 10% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(151 20% 10% / 0.1), 0 2px 4px -2px hsl(151 20% 10% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(151 20% 10% / 0.1), 0 4px 6px -4px hsl(151 20% 10% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(151 20% 10% / 0.1), 0 8px 10px -6px hsl(151 20% 10% / 0.1);
+    --shadow-glow: 0 0 30px -5px hsl(151 63% 25% / 0.3);
+    --shadow-gold: 0 0 30px -5px hsl(43 96% 56% / 0.4);
+  }
+
+  .dark {
+    --primary: 151 60% 45%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 43 90% 50%;
+    --secondary-foreground: 0 0% 10%;
+    
+    --background: 151 30% 8%;
+    --foreground: 0 0% 95%;
+    
+    --card: 151 25% 12%;
+    --card-foreground: 0 0% 95%;
+    
+    --popover: 151 25% 12%;
+    --popover-foreground: 0 0% 95%;
+    
+    --muted: 151 20% 18%;
+    --muted-foreground: 151 10% 60%;
+    
+    --accent: 43 90% 50%;
+    --accent-foreground: 0 0% 10%;
+    
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 151 60% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 43 90% 50%;
+    --warning-foreground: 0 0% 10%;
+    
+    --info: 210 90% 60%;
+    --info-foreground: 0 0% 100%;
+    
+    --border: 151 20% 20%;
+    --input: 151 20% 20%;
+    --ring: 151 60% 45%;
+    
+    --sidebar-background: 151 25% 10%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 151 60% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 43 90% 50%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 151 20% 18%;
+    --sidebar-ring: 151 60% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+  
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-secondary);
+  }
+  
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+  
+  .bg-gradient-secondary {
+    background-image: var(--gradient-secondary);
+  }
+  
+  .bg-gradient-hero {
+    background-image: var(--gradient-hero);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+  
+  .glass {
+    @apply bg-background/80 backdrop-blur-lg;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+}
