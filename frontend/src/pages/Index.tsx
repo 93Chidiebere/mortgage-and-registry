@@ -38,9 +38,8 @@ export default function Index() {
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-secondary-foreground border border-secondary/30">
                 <span className="text-sm font-medium">MoRe, Powering Nigeria's Real Estate Economy</span>
               </div>
-              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight break-words">
-                The Operating System for <br />
-                <span className="text-primary">Mortgages & Land Registry</span>
+              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
+                The Operating System for <span className="text-primary">Mortgages & Land Registry</span>
               </h1>
               <p className="text-lg text-muted-foreground max-w-xl">
                 Verify titles, process mortgages, and build absolute trust in property transactions, MoRe bridges the gap between land security and capital.
