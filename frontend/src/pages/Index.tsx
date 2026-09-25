@@ -57,17 +57,27 @@ export default function Index() {
                   </Button>
                 </Link>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-4">
-                <div className="flex -space-x-2 shrink-0">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-10 h-10 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-medium">
-                      {String.fromCharCode(64 + i)}
+              {/* MoRe: Mortgage and Registry Interface */}
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link to="/registry/surveyor" className="group bg-background/80 backdrop-blur-md p-4 lg:p-5 rounded-xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary flex flex-col items-start text-left">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-blue-100 text-blue-700 rounded-lg group-hover:scale-110 transition-transform">
+                      <Map className="w-5 h-5" />
                     </div>
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground break-words whitespace-normal w-full">
-                  <span className="font-semibold text-foreground">Join</span> the growing community of smart homebuyers
-                </p>
+                    <h3 className="font-semibold text-foreground text-base">Surveyor Portal</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">Lock GPS boundaries and cryptographically sign survey plans.</p>
+                </Link>
+
+                <Link to="/registry/vault" className="group bg-background/80 backdrop-blur-md p-4 lg:p-5 rounded-xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary flex flex-col items-start text-left">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-green-100 text-green-700 rounded-lg group-hover:scale-110 transition-transform">
+                      <ShieldCheck className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-base">Landowner Vault</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">Approve boundary splits and clear titles for mortgage underwriting.</p>
+                </Link>
               </div>
 
               {/* Scrolling Ticker */}
@@ -100,29 +110,6 @@ export default function Index() {
                   </a>
                 </div>
               </div>
-
-            {/* MoRe: Mortgage and Registry Interface */}
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Link to="/registry/surveyor" className="group bg-background/80 backdrop-blur-md p-4 lg:p-5 rounded-xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary flex flex-col items-start text-left">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-blue-100 text-blue-700 rounded-lg group-hover:scale-110 transition-transform">
-                    <Map className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-semibold text-foreground text-base">Surveyor Portal</h3>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">Lock GPS boundaries and cryptographically sign survey plans.</p>
-              </Link>
-
-              <Link to="/registry/vault" className="group bg-background/80 backdrop-blur-md p-4 lg:p-5 rounded-xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary flex flex-col items-start text-left">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-green-100 text-green-700 rounded-lg group-hover:scale-110 transition-transform">
-                    <ShieldCheck className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-semibold text-foreground text-base">Landowner Vault</h3>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">Approve boundary splits and clear titles for mortgage underwriting.</p>
-              </Link>
-            </div>
 
           </motion.div>
         </div>
