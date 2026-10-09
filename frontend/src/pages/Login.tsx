@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Building2, User, Shield, KeyRound, MessageCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Building2, User, Shield, KeyRound, MessageCircle, Home, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';

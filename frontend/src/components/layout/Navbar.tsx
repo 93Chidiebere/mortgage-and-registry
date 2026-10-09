@@ -132,9 +132,6 @@ export function Navbar() {
               </DropdownMenu>
             ) : (
               <>
-                <Button variant="ghost" onClick={() => navigate('/login')} className="hidden sm:inline-flex">
-                  Sign In
-                </Button>
                 <Button variant="outline" onClick={() => navigate('/lender')} className="hidden sm:inline-flex border-primary text-primary hover:bg-primary/5">
                   Lender
                 </Button>
@@ -200,11 +197,6 @@ export function Navbar() {
                 <Heart className="inline-block mr-2 h-4 w-4" />
                 Favorites {favorites.length > 0 && `(${favorites.length})`}
               </Link>
-              {!user && (
-                <Button variant="outline" onClick={() => { navigate('/login'); setIsOpen(false); }} className="mx-4 mt-2">
-                  Sign In
-                </Button>
-              )}
             </div>
           </motion.div>
         )}
