@@ -1,42 +1,105 @@
+"""event_log.py - canonical encoding, commitments and the append-only event log.
+
+Hash definitions (shared with the SQL trigger in schema.sql):
+    canonical_payload = canonical_json({"v":1, "type", "parcel_id", "parcel_seq", "body"})
+    event_hash        = sha256(prev_hash || canonical_payload)
+"""
+from __future__ import annotations
+
 import hashlib
 import json
+from uuid import UUID
+
+import shapely
 from shapely.geometry import Polygon
+from shapely.geometry.polygon import orient
 
-def sha256(data: bytes) -> bytes:
-    return hashlib.sha256(data).digest()
+# Serialises event appends so global `seq` order == commit order. The anchoring job takes
+# the same lock, which is what guarantees it never skips an in-flight event.
+# (Registry writes are low-volume; if that ever changes, move to a single-writer queue.)
+EVENT_LOG_LOCK = 0x4D6F5265  # "MoRe"
+ZERO_HASH = bytes(32)
 
-def canonical_json(data: dict) -> bytes:
-    def walk(obj):
-        if isinstance(obj, float):
-            raise TypeError("Floats not allowed in canonical JSON")
-        if isinstance(obj, dict):
-            return {k: walk(v) for k, v in sorted(obj.items())}
-        if isinstance(obj, list):
-            return [walk(v) for v in obj]
-        return obj
-    
-    cleaned = walk(data)
-    # The test expects: E.canonical_json({"b": 1, "a": [2, {"y": 1, "x": 2}]}) == b'{"a":[2,{"x":2,"y":1}],"b":1}'
-    return json.dumps(cleaned, separators=(',', ':')).encode('utf-8')
+EVENT_TYPES = {
+    "PARCEL_PROPOSED", "OWNER_APPROVED", "PARCEL_ACTIVATED", "PARCEL_RETIRED",
+    "DISPUTE_OPENED", "DISPUTE_RESOLVED", "ENCUMBRANCE_ADDED", "ENCUMBRANCE_DISCHARGED",
+    "OWNERSHIP_TRANSFERRED",
+}
 
-def geom_hash(poly: Polygon) -> bytes:
-    # Test: p = wgs(rect(0, 0, 20, 30))
-    # rotated = Polygon(list(p.exterior.coords)[2:-1] + list(p.exterior.coords)[:2])
-    # reversed_ = Polygon(list(p.exterior.coords)[::-1])
-    # E.geom_hash(p) == E.geom_hash(rotated) == E.geom_hash(reversed_)
-    
-    # We round to avoid precision issues
-    coords = [(round(x, 6), round(y, 6)) for x, y in poly.exterior.coords[:-1]]
-    if not coords:
-        return sha256(b"")
-    
-    # Find minimum vertex
-    min_idx = min(range(len(coords)), key=lambda i: coords[i])
-    
-    # Check both directions
-    dir1 = coords[min_idx:] + coords[:min_idx]
-    dir2 = [coords[i % len(coords)] for i in range(min_idx, min_idx - len(coords), -1)]
-    
-    canonical_coords = min(dir1, dir2)
-    canonical_str = ",".join(f"{x}:{y}" for x, y in canonical_coords)
-    return sha256(canonical_str.encode('utf-8'))
+
+def sha256(b: bytes) -> bytes:
+    return hashlib.sha256(b).digest()
+
+
+def _reject_floats(o):
+    if isinstance(o, float):
+        raise TypeError("floats are not allowed in canonical payloads; use ints or strings")
+    if isinstance(o, dict):
+        for k, v in o.items():
+            if not isinstance(k, str):
+                raise TypeError("canonical payload keys must be strings")
+            _reject_floats(v)
+    elif isinstance(o, (list, tuple)):
+        for v in o:
+            _reject_floats(v)
+
+
+def canonical_json(obj) -> bytes:
+    """Deterministic JSON: sorted keys, no whitespace, UTF-8, no floats.
+    (A pragmatic subset of RFC 8785; adopt a full JCS library if third parties will re-derive it.)"""
+    _reject_floats(obj)
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+
+
+def event_hash(prev_hash: bytes, canonical_payload: bytes) -> bytes:
+    return sha256(prev_hash + canonical_payload)
+
+
+def geom_hash(poly_wgs84: Polygon, grid: float = 1e-7) -> bytes:
+    """sha256 of a canonical form of the geometry: snapped to ~1 cm, CCW exterior, normalised
+    start vertex, 2D WKB. The same surveyed polygon always hashes to the same value."""
+    g = shapely.set_precision(poly_wgs84, grid)
+    g = orient(g, 1.0)
+    g = shapely.normalize(g)
+    return sha256(shapely.to_wkb(g, output_dimension=2, byte_order=1))
+
+
+def owner_commitment(owner_id: str | UUID, salt: bytes) -> str:
+    """Salted commitment so events can reference an owner without exposing who it is."""
+    return sha256(bytes(salt) + UUID(str(owner_id)).bytes).hex()
+
+
+def append_event(cur, parcel_id: str, event_type: str, body: dict, actor_ref: str | None = None):
+    """Append one event to a parcel's chain. Must run inside the caller's transaction.
+    Returns (seq, event_hash). The DB trigger re-verifies linkage and hash."""
+    if event_type not in EVENT_TYPES:
+        raise ValueError(f"unknown event type {event_type}")
+    cur.execute("SELECT pg_advisory_xact_lock(%s)", (EVENT_LOG_LOCK,))
+    cur.execute(
+        "SELECT parcel_seq, event_hash FROM parcel_events "
+        "WHERE parcel_id = %s ORDER BY parcel_seq DESC LIMIT 1", (str(parcel_id),))
+    row = cur.fetchone()
+    parcel_seq, prev = (row[0] + 1, bytes(row[1])) if row else (1, ZERO_HASH)
+
+    payload = {"v": 1, "type": event_type, "parcel_id": str(parcel_id),
+               "parcel_seq": parcel_seq, "body": body}
+    canonical = canonical_json(payload)
+    h = event_hash(prev, canonical)
+    cur.execute(
+        "INSERT INTO parcel_events (parcel_id, parcel_seq, event_type, payload, canonical_payload,"
+        " prev_hash, event_hash, actor_ref) VALUES (%s,%s,%s,%s::jsonb,%s,%s,%s,%s) RETURNING seq",
+        (str(parcel_id), parcel_seq, event_type, canonical.decode("utf-8"), canonical, prev, h, actor_ref))
+    return cur.fetchone()[0], h
+
+
+def verify_parcel_chain(events: list[dict]) -> bool:
+    """events: [{parcel_seq, prev_hash, canonical_payload, event_hash}] for ONE parcel, ordered.
+    Pure function: lets a lender or auditor re-check a chain without trusting our database."""
+    prev = ZERO_HASH
+    for i, e in enumerate(events, start=1):
+        if e["parcel_seq"] != i or bytes(e["prev_hash"]) != prev:
+            return False
+        if event_hash(prev, bytes(e["canonical_payload"])) != bytes(e["event_hash"]):
+            return False
+        prev = bytes(e["event_hash"])
+    return True
