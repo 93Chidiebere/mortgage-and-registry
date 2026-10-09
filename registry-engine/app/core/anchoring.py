@@ -1,92 +1,69 @@
-import hashlib
-import os
-from sqlalchemy.orm import Session
-from web3 import Web3
+import struct
+from typing import List, Optional, Dict, Any
+from event_log import sha256
 
-from app.models.parcel import Parcel, ParcelHash, ParcelStatus
+def leaf_hash(data: bytes) -> bytes:
+    return sha256(b'\x00' + data)
 
-# Environment Variables (Using Polygon RPC)
-POLYGON_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
-# In production, this private key belongs to the system's "Notary Wallet"
-PRIVATE_KEY = os.getenv("ANCHOR_WALLET_PRIVATE_KEY", "0x0000000000000000000000000000000000000000000000000000000000000001") 
+def node_hash(left: bytes, right: bytes) -> bytes:
+    return sha256(b'\x01' + left + right)
 
-def hash_leaf(data: str) -> str:
-    """Simple SHA256 hash for a leaf node."""
-    return hashlib.sha256(data.encode('utf-8')).hexdigest()
-
-def build_merkle_root(leaves: list[str]) -> str:
-    """Builds a deterministic Merkle root from a list of leaf hashes."""
+def build_levels(leaves: List[bytes]) -> List[List[bytes]]:
     if not leaves:
-        return hash_leaf("empty_registry")
-    if len(leaves) == 1:
-        return leaves[0]
-    
-    new_level = []
-    for i in range(0, len(leaves), 2):
-        left = leaves[i]
-        # If odd number of leaves, duplicate the last one
-        right = leaves[i+1] if i+1 < len(leaves) else left 
-        combined = left + right
-        new_level.append(hash_leaf(combined))
-        
-    return build_merkle_root(new_level)
+        return []
+    levels = [leaves]
+    while len(levels[-1]) > 1:
+        current = levels[-1]
+        next_level = []
+        for i in range(0, len(current), 2):
+            if i + 1 < len(current):
+                next_level.append(node_hash(current[i], current[i+1]))
+            else:
+                # pass odd node up
+                next_level.append(current[i])
+        levels.append(next_level)
+    return levels
 
-def generate_daily_merkle_root(db: Session) -> str:
-    """
-    Fetches all ACTIVE parcels, creates a cryptographic string for each,
-    and calculates the global Merkle root representing the exact state of the registry.
-    """
-    active_parcels = db.query(Parcel).filter(Parcel.status == ParcelStatus.ACTIVE).all()
-    
-    leaves = []
-    for parcel in active_parcels:
-        # Fetch associated H3 spatial indices
-        hashes = db.query(ParcelHash.h3_index).filter(ParcelHash.parcel_id == parcel.id).all()
-        h3_strings = ",".join(sorted([h[0] for h in hashes]))
-        
-        # The core immutable data block: "ParcelID:OwnerID:H3Array"
-        data_block = f"{parcel.id}:{parcel.owner_id}:{h3_strings}"
-        leaves.append(hash_leaf(data_block))
-        
-    # Sort leaves alphabetically to ensure the tree is deterministic regardless of DB fetch order
-    leaves.sort()
-    
-    merkle_root = build_merkle_root(leaves)
-    return merkle_root
+def merkle_root(levels: List[List[bytes]]) -> bytes:
+    if not levels:
+        return bytes(32)
+    return levels[-1][0]
 
-def anchor_root_to_polygon(merkle_root: str):
-    """
-    Submits the Merkle Root to the Polygon blockchain by embedding it 
-    into the data payload of a 0-ETH transaction.
-    """
-    try:
-        w3 = Web3(Web3.HTTPProvider(POLYGON_RPC_URL))
-        if not w3.is_connected():
-            print("Warning: Could not connect to Polygon RPC. Skipping anchor.")
-            return None
-            
-        account = w3.eth.account.from_key(PRIVATE_KEY)
-        
-        # Embed the merkle root directly in the transaction 'data' field
-        # This is a highly gas-efficient way to timestamp data without a custom Smart Contract
-        tx = {
-            'to': account.address, # Sending a transaction to ourselves
-            'value': 0,
-            'gas': 50000,
-            'gasPrice': w3.eth.gas_price,
-            'nonce': w3.eth.get_transaction_count(account.address),
-            'data': w3.to_bytes(text=f"GEOHASH_ANCHOR:{merkle_root}"),
-            'chainId': 137 # Polygon Mainnet
-        }
-        
-        # Sign and send
-        signed_tx = w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
-        tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        
-        print(f"Successfully anchored Merkle Root {merkle_root} to Polygon.")
-        print(f"Transaction Hash: {w3.to_hex(tx_hash)}")
-        
-        return w3.to_hex(tx_hash)
-    except Exception as e:
-        print(f"Anchoring failed: {e}")
-        return None
+def inclusion_path(levels: List[List[bytes]], index: int) -> List[tuple]:
+    path = []
+    curr_idx = index
+    for level in levels[:-1]:
+        if curr_idx % 2 == 0:
+            if curr_idx + 1 < len(level):
+                path.append((True, level[curr_idx + 1])) # sibling is on the right
+            # if no right sibling, nothing to append to path
+        else:
+            path.append((False, level[curr_idx - 1])) # sibling is on the left
+        curr_idx //= 2
+    return path
+
+def verify_path(leaf: bytes, path: List[tuple], root: bytes) -> bool:
+    curr = leaf
+    for is_right_sibling, sibling_hash in path:
+        if is_right_sibling:
+            curr = node_hash(curr, sibling_hash)
+        else:
+            curr = node_hash(sibling_hash, curr)
+    return curr == root
+
+def anchor_payload(first_seq: int, last_seq: int, count: int, root: bytes) -> bytes:
+    # Test requires: len(p) == 57 and p[:4] == b"MORE" and p[4] == 1
+    # 57 bytes: 4 (MORE) + 1 (version=1) + 8 (first_seq) + 8 (last_seq) + 4 (count) + 32 (root) = 57
+    return struct.pack(">4sBQQI32s", b"MORE", 1, first_seq, last_seq, count, root)
+
+# Database integration stubs for later
+def build_batch(conn, chain_id: int):
+    # build the next batch from parcel_events
+    # we'll implement this when writing the integration sql logic
+    pass
+
+def get_receipt(conn, seq: int) -> dict:
+    pass
+
+def verify_receipt(receipt: dict, onchain_input: bytes = None) -> bool:
+    pass
