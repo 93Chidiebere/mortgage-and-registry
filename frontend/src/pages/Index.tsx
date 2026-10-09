@@ -115,29 +115,8 @@ export default function Index() {
       </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-12 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center"
-              >
-                <p className="text-3xl md:text-4xl font-display font-bold text-secondary">{stat.value}</p>
-                <p className="text-sm text-primary-foreground/80 mt-1">{stat.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Features */}
-      <section className="py-20 bg-background">
+      <section className="pt-8 pb-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Why Choose MoRe?</h2>
@@ -161,19 +140,6 @@ export default function Index() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 bg-muted">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">Ready to Own Your Home?</h2>
-          <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Join thousands of Nigerians who found their perfect mortgage match.
-          </p>
-          <Button asChild size="lg" className="h-14 px-8 text-lg">
-            <Link to="/apply">Get Started Free <ArrowRight className="ml-2 h-5 w-5" /></Link>
-          </Button>
         </div>
       </section>
     </MainLayout>

@@ -18,7 +18,7 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Nigeria's premier mortgage marketplace. Compare, apply, and track your mortgage journey with transparency.
+              Nigeria's operating system for Mortgages and Land Registry. Compare, apply, and track your mortgage journey with transparency.
             </p>
             <div className="flex gap-4">
               <a href="https://x.com/NigeriaMortgage" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-background transition-colors">
@@ -102,7 +102,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-muted-foreground/20">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} MortgageNG. All rights reserved.
+              © {new Date().getFullYear()} MoRe. All rights reserved.
             </p>
             <p className="text-sm font-medium text-muted-foreground md:absolute md:left-1/2 md:-translate-x-1/2">
               By UNICCO
@@ -124,3 +124,4 @@ export function Footer() {
     </footer>
   );
 }
+
