@@ -31,6 +31,9 @@ import RegistryIndex from "./pages/RegistryIndex";
 import SurveyorPortal from "./pages/SurveyorPortal";
 import LandownerVault from "./pages/LandownerVault";
 
+import LenderHub from "./pages/LenderHub";
+import BorrowerHub from "./pages/BorrowerHub";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -44,6 +47,8 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/borrower" element={<BorrowerHub />} />
+                <Route path="/lender" element={<LenderHub />} />
                 <Route path="/apply" element={<Apply />} />
                 <Route path="/compare" element={<Compare />} />
                 <Route path="/calculator" element={<Calculator />} />

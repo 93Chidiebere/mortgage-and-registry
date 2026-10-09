@@ -135,8 +135,11 @@ export function Navbar() {
                 <Button variant="ghost" onClick={() => navigate('/login')} className="hidden sm:inline-flex">
                   Sign In
                 </Button>
-                <Button onClick={() => navigate('/apply')} className="bg-primary hover:bg-primary/90">
-                  Apply Now
+                <Button variant="outline" onClick={() => navigate('/lender')} className="hidden sm:inline-flex border-primary text-primary hover:bg-primary/5">
+                  Lender
+                </Button>
+                <Button onClick={() => navigate('/borrower')} className="bg-primary hover:bg-primary/90">
+                  Borrower
                 </Button>
               </>
             )}

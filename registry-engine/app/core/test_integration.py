@@ -122,7 +122,7 @@ db = pytest.mark.skipif(not DB, reason="set DATABASE_URL to run integration test
 @pytest.fixture()
 def conn():
     import psycopg
-    c = psycopg.connect(DB, autocommit=True)
+    c = psycopg.connect(DB, autocommit=True, prepare_threshold=None)
     c.execute("DROP SCHEMA public CASCADE")
     c.execute("CREATE SCHEMA public")
     c.execute((Path(__file__).parent / "schema.sql").read_text())
@@ -213,7 +213,7 @@ def test_concurrent_overlapping_claims_cannot_both_pass(conn):
     results, barrier = [], threading.Barrier(6)
 
     def worker(i):
-        c = psycopg.connect(DB, autocommit=True)
+        c = psycopg.connect(DB, autocommit=True, prepare_threshold=None)
         barrier.wait()
         results.append(O.submit_proposal(c, proposal(owners[i], SURVEYOR_A, [rect(i, 0, 20, 30)])))   
         c.close()
